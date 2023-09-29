@@ -67,7 +67,7 @@ Therefore let us not sleep, as do others; but let us watch and be sober.";
             {
                 Console.Write("Enter the scripture reference: ");
                 reference = Console.ReadLine();
-                Console.WriteLine("Enter the scripture (ends with a blank line):");
+                Console.WriteLine("Enter the scripture (end with a blank line):");
                 string line;
                 text = "";
                 do{
