@@ -15,10 +15,12 @@ class Program
     {
         bool exit = false;
 
+        // Declare the objects for the three activities
         BreathingActivity opt1 = new BreathingActivity();
         ReflectionActivity opt2 = new ReflectionActivity();
         ListingActivity opt3 = new ListingActivity();
 
+        // Create a function for the quit option
         void Quit()
         {
             Console.WriteLine($"Thank yourself for taking time for your own mindfulness.");
@@ -40,12 +42,11 @@ class Program
         menu.AddOption("4", "Quit", quitCallback);
         menu.SetPrompt("Select a choice from the menu: ");
 
-        while (!exit)
         // Loop until 'exit' is set to false by the Quit callback function
+        while (!exit)
         {
             // Show the menu (prompt loops until a selection is made, and then a callback function is executed)
             menu.DisplayMenu();
         }
-
     }
 }

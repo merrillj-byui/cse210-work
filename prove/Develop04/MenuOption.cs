@@ -14,6 +14,8 @@
 | SetMenuOptionCallback(MenuOptionCallback) : void      |
 | RunMenuOption() : void                                |
 +-------------------------------------------------------+
+
+Exceeds: The menu uses callback functions. A callback function is attached to each menu option.
 */
 
 using System.Reflection.Metadata.Ecma335;

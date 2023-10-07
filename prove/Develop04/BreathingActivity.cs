@@ -34,7 +34,7 @@ public class BreathingActivity : Activity
     private int _breatheSeconds = 10;
 
     // Constructors
-    
+
     public BreathingActivity() : base()
     {
         SetName("Breating Activity");
@@ -55,7 +55,7 @@ public class BreathingActivity : Activity
             DisplayCount(i, '>');
         }
 
-        Console.WriteLine();
+        Console.WriteLine("done.");
     }
 
     public void BreatheOut()
@@ -70,14 +70,14 @@ public class BreathingActivity : Activity
             // Display the breath seconds count indicator
             DisplayCount(i, '<');
         }
-        Console.WriteLine("\n");
+        Console.WriteLine("done.\n");
     }
 
     public void DisplayCount(int i, char indicator)
     // This is different than the Activity CountDown(). This shows a line of dots equivalent to the count, and the count number, sleeps, then wipes out that displayed text.
     {
         // A string of '.' equivalent to the count concatenated with the count number
-        string countStr = new string(indicator, i) + i;
+        string countStr = " " + new string(indicator, i) + " " + i;
 
         // A string that will backspace over the whole countStr, replace it with ' ', and backspace again
         string clearStr = new string('\b', countStr.Length);

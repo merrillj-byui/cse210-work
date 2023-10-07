@@ -152,6 +152,7 @@ public class Activity
 
     public void PauseSpinner(int timer)
     // Function to present a spinner that displayes for the specified timer (seconds)
+    // Exceeds: Put space around the spinner so it is easier to see
     {
         int index = 0; // Index into the array of spinner characters
 
@@ -222,6 +223,7 @@ public class Activity
 
     public void CountDown(int counter)
     // Function to display an integer countdown (multiple digits supported)
+    // Exceeds: Handles a counter that is multiple digits
     {
         string clearString; // Used to create a string that backspaces over the counter, replaces it with spaces, and backspaces over it again
         string indexString; // Convert string to an index so we know it's character length so we know how many characters to mask over
