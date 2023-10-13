@@ -3,11 +3,11 @@ public class SimpleGoal : Goal
     public SimpleGoal(string name, string description, int pointValue) : base (name, description, pointValue){}
 
 
-    public override int GetScore()
-    {
-        // The score is just the point value if it has been completed, otherwise 0
-        return IsCompleted() ? GetPoints() : 0;
-    }
+    // public override int GetScore()
+    // {
+    //     // The score is just the point value if it has been completed, otherwise 0
+    //     return IsCompleted() ? GetPoints() : 0;
+    // }
 
 
     public override int GetPossibleScore()

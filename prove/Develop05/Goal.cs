@@ -100,7 +100,10 @@ public abstract class Goal
     }
 
 
-    public abstract int GetScore();
+    public virtual int GetScore()
+    {
+        return IsCompleted() ? GetPoints() : 0;
+    }
 
     public abstract int GetPossibleScore();
 
