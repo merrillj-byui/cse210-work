@@ -1,0 +1,4 @@
+SimpleGoal:Give a talk,Speak in Sacrament meeting when asked,100,True,10/13/2023 9:07:29AM
+EternalGoal:Study the scriptures,Study for at least 10 minutes,50,2
+ChecklistGoal:Attend the temple,Attend and perform any ordinance,50,3,500,3,True,10/13/2023 9:11:48AM
+ChecklistGoal:Wake up early,Wake up at least by 6:00sam,10,10,1000,0,False,

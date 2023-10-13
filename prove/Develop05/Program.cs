@@ -4,6 +4,10 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello Develop05 World!");
+        // Instantiate the Goal Manager
+        GoalManager goalManager = new GoalManager();
+        
+        // Start the Goal Manager running
+        goalManager.Start();
     }
 }
