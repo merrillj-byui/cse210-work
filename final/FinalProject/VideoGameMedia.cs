@@ -15,7 +15,8 @@ Methods
     GetListing() : string <override>
     GetDetail() : string <override>
     GetInfoString() : string <override>
-    GetDataDictionary() : Dictionary<string, object>
+    GetData() : MediaConvertObject
+    SetData(MediaConvertObject) : void
 */
 
 
@@ -24,7 +25,7 @@ using System.Reflection;
 
 public class VideoGameMedia : Media
 {
-    private string _mediaType = "Video Game";
+    // Attributes
     private string _rating = "Other";
     private string[] _ratings = {"E", "E10+", "T", "M", "A", "Unrated", "Other"};
 
@@ -34,12 +35,14 @@ public class VideoGameMedia : Media
     }
 
 
+    // Constructors
     public string[] GetAllRatings()
     {
         return _ratings;
     }
 
 
+    // Setters and Getters
     public void SetRating(string rating)
     {
         if (_ratings.Contains(rating))
@@ -48,14 +51,15 @@ public class VideoGameMedia : Media
         }
     }
 
-
     public string GetRating()
     {
         return _rating;
     }
 
 
+    // Other Methods
     public string GetAgeGuidance()
+    // Returns the age guidance based on the rating
     {
         string ageGuidance = "Other";
 
@@ -87,67 +91,112 @@ public class VideoGameMedia : Media
     }
 
     public override string GetListing()
+    // Returns a string that can be used in a displayed list
     {
         string listing = $"[{GetMediaType()}] {GetTitle()} ({GetRating()})";
-        if (IsAvailable() && !IsOnLoan())
-        {
-            listing += " - AVAILABLE";
-        }
-        else if (IsOnLoan())
-        {
-            listing += $" - Due back: {GetLastLoan().GetDueDate().ToShortDateString()}";
-        }
-        else
-        {
-            listing += $" - Unavailable: {GetLastNote()}";
-        }
-
+        if (IsAvailable() && !IsOnLoan()) { listing += " - AVAILABLE"; }
+        else if (IsOnLoan()) { listing += $" - LOANED OUT"; }
+        else { listing += $" - UNAVAILABLE: {GetLastNote()}"; }
         return listing;
     }
 
     public override string GetDetail()
-    {
-        return base.GetDetail();
+     // Returns a multi-line string containing details
+   {
+        string details = $"Details for: {GetTitle()}\n";
+        details += $"Media type: {GetMediaType()}\n";
+        details += $"Rating: {GetRating()} - {GetAgeGuidance()}\n";
+        details += $"Acquired on: {GetAcquireDate()}\n";
+        if (IsOnLoan())
+        {
+            LendingRecord loan = GetLastLoan();
+            Borrower borrower = GetLastBorrower();
+            details += $"Status: On Loan to... \n{borrower.GetMailLabel()}\n";
+            details += $"Phone: {borrower.GetPhone()}\n";
+            details += $"Due date: {loan.GetDueDate()}\n";
+        }
+        else if (IsAvailable()) { details += $"Status: AVAILABLE"; }
+        else
+        {
+            details += $"Status: UNAVAILABLE\n";
+            details += $"Last Note: {GetLastNote()}";
+        }
+        return details;
     }
 
     public override string GetInfoString()
+    // Returns a single line string suitable for searching
     {
-        return base.GetInfoString();
+        string info = $"{GetTitle()}," + $"{GetRating()}," + $"{GetMediaType()}";
+        return info;
     }
 
 
-    public override Dictionary<string, object> GetDataDictionary()
+    public override MediaConvertObject GetData()
+    // Returns a public class used for JSON serializing and deserializing
     {
-        Dictionary<string, object> data = new Dictionary<string, object>{};
-
-        data.Add("mediaType", GetMediaType());
-        data.Add("title", GetTitle());
-        data.Add("genre", GetGenre());
-        data.Add("publishDate", GetPublishDate());
-        data.Add("acquireDate", GetAcquireDate());
-        data.Add("available", IsAvailable());
-        data.Add("rating", GetRating());
-
+        // Populate a MediaConverterObject with data from this Book media
         Borrower borrower;
+        MediaConvertObject data = new MediaConvertObject();
+        data.loans = new List<LendingConvertObject>(){};
+        data.mediaType = GetMediaType();
+        data.title = GetTitle();
+        data.acquireDate = GetAcquireDate();
+        data.available = IsAvailable();
+        data.rating = GetRating();
+        // Loop through the lending records and populate a list of LendingConvertObject
         foreach (LendingRecord loan in GetLoans())
         {
             borrower = loan.GetBorrower();
-            data.Add("borrower", new Dictionary<string, object> {
-                        {"name", borrower.GetFullName()},
-                        {"phone", borrower.GetPhone()},
-                        {"email", borrower.GetEmail()},
-                        {"streetAddress", borrower.GetStreetAddress()},
-                        {"city", borrower.GetCity()},
-                        {"state", borrower.GetState()},
-                        {"zip", borrower.GetZip()}
-                    } );
-            data.Add("borrowedDate", loan.GetBorrowedDate());
-            data.Add("returnedDate", loan.GetReturnedDate());
-            data.Add("dueDate", loan.GetDueDate());
-            data.Add("returned", loan.IsReturned());
+            LendingConvertObject loanConvert = new LendingConvertObject();
+            BorrowerConvertObject borrowerConvert = new BorrowerConvertObject();
+            borrowerConvert.firstName = borrower.GetFirstName();
+            borrowerConvert.lastName = borrower.GetLastName();
+            borrowerConvert.phone = borrower.GetPhone();
+            borrowerConvert.email = borrower.GetEmail();
+            borrowerConvert.streetAddress = borrower.GetStreetAddress();
+            borrowerConvert.city = borrower.GetCity();
+            borrowerConvert.state = borrower.GetState();
+            borrowerConvert.zip = borrower.GetZip();
+            loanConvert.borrower = borrowerConvert;
+            loanConvert.borrowedDate = loan.GetBorrowedDate();
+            loanConvert.returnedDate = loan.GetReturnedDate();
+            loanConvert.dueDate = loan.GetDueDate();
+            loanConvert.returned = loan.IsReturned();
+            data.loans.Add(loanConvert);
         }
-        data.Add("notes:", GetNotes());
-
+        data.notes = GetNotes();
+        // Return the object ready for serialization
         return data;
+    }    
+
+
+    public override void SetData(MediaConvertObject mediaData)
+    // Uses the MediaConvertObject to populate this media object
+    {
+        SetAcquireDate((DateTime)mediaData.acquireDate);
+        SetAvailable((bool)mediaData.available);
+        SetRating(mediaData.rating);
+        if (mediaData.loans != null)
+        {   
+            foreach (LendingConvertObject loanConvert in mediaData.loans)
+            {
+                string fullName = $"{loanConvert.borrower.firstName} {loanConvert.borrower.lastName}";
+                Borrower borrower = new Borrower(fullName);
+                borrower.SetPhone(loanConvert.borrower.phone);
+                borrower.SetEmail(loanConvert.borrower.email);
+                borrower.SetStreetAddress(loanConvert.borrower.streetAddress);
+                borrower.SetCity(loanConvert.borrower.city);
+                borrower.SetState(loanConvert.borrower.state);
+                borrower.SetZip(loanConvert.borrower.zip);
+                LendingRecord loan = new LendingRecord(borrower);
+                loan.SetBorrowedDate((DateTime)loanConvert.borrowedDate);
+                loan.SetReturnedDate((DateTime)loanConvert.returnedDate);
+                loan.SetDueDate((DateTime)loanConvert.returnedDate);
+                loan.SetReturned((bool)loanConvert.returned);
+                AddLoan(loan);
+            }
+        }
+        SetNotes((List<string>)mediaData.notes);
     }
 }

@@ -24,7 +24,8 @@ Methods
     SetAvailable(bool) : void
     IsAvailable() : bool
     NewLoan(Borrower) : void
-    Return(Borrower) : void
+    Return() : void
+    AddLoan(LendingRecord) : void
     GetLastLoan() : LendingRecord
     GetLoans() : List<LendingRecord>
     GetBorrower(int) : Borrower
@@ -44,6 +45,7 @@ using Microsoft.VisualBasic;
 
 public abstract class Media
 {
+    // Attributes
     private string _mediaType;
     private string _title;
     private List<string> _genre = new List<string>{};
@@ -53,79 +55,75 @@ public abstract class Media
     private List<LendingRecord> _loans = new List<LendingRecord>{};
     private List<string> _notes = new List<string>{};
 
+
+    // Constructors
     public Media(string title, string mediaType)
     {
         _mediaType = mediaType;
         _title = title;
+        _publishDate = DateTime.MinValue;
         _acquireDate = DateTime.Now;
         _available = true;
     }
 
 
+    // Setters and Getters
     public  string GetMediaType()
     {
         return _mediaType;
     }
-
 
     public void SetTitle(string title)
     {
         _title = title;
     }
 
-
     public string GetTitle()
     {
         return _title;
     }
-
 
     public void AddGenre(string genre)
     {
         _genre.Add(genre);
     }
 
-
     public List<string> GetGenre()
     {
         return  _genre;
-    }
-    
+    }   
     
     public void SetPublishDate(DateTime publishDate)
     {
         _publishDate = publishDate;
-    }
-    
+    }   
     
     public DateTime GetPublishDate()
     {
         return _publishDate;
-    }
-    
+    }   
     
     public void SetAcquireDate(DateTime acquireDate)
     {
         _acquireDate = acquireDate;
     }
-    
-    
+       
     public DateTime GetAcquireDate()
     {
         return _acquireDate;
     }
-
 
     public void SetAvailable(bool available)
     {
         _available = available;
     }
 
+
+    // Other methods
     public bool IsAvailable()
     {
         return _available;
-    }
-    
+    }   
     
     public void NewLoan(Borrower borrower)
     {
@@ -136,39 +134,38 @@ public abstract class Media
         }
     }
     
-    
-    public void Return(Borrower borrower)
+    public void Return()
     {
-        if (IsOnLoan() && GetLastBorrower() == borrower)
+        if (IsOnLoan())
         {
             _loans[_loans.Count - 1].Return();
         }
     }
 
+    public void AddLoan(LendingRecord loan)
+    {
+        _loans.Add(loan);
+    }
 
     public LendingRecord GetLastLoan()
     {
         return _loans.Count > 0 ? _loans[_loans.Count - 1] : null;
     }
 
-
     public List<LendingRecord> GetLoans()
     {
         return _loans;
-    }
-    
+    }   
     
     public Borrower GetBorrower()
     {
         return !IsOnLoan() ? GetLastBorrower() : null;
-    }
-    
+    }    
     
     public Borrower GetLastBorrower()
     {
         return _loans[_loans.Count - 1].GetBorrower();
     }
-
 
      public bool IsOnLoan()
     {
@@ -187,8 +184,8 @@ public abstract class Media
     }
 
 
-
     public virtual string GetListing()
+    // Returns a string that can be used in a displayed list
     {
         string listing = $"[{GetMediaType()}] {GetTitle()}";
         if (GetPublishDate() != DateTime.MinValue)
@@ -202,21 +199,25 @@ public abstract class Media
         }
         else if (IsOnLoan())
         {
-            listing += $" - Due back: {_loans[_loans.Count - 1].GetDueDate().ToShortDateString()}";
+            listing += $" - LOANED OUT";
         }
         else
         {
-            listing += $" - Unavailable: {GetLastNote()}";
+            listing += $" - UNAVAILABLE: {GetLastNote()}";
         }
 
         return listing;
     }
 
     public virtual string GetDetail()
+    // Returns a multi-line strin containing details
     {
         string details = $"Details for: {GetTitle()}\n";
         details += $"Media type: {GetMediaType()}\n";
-        if (GetPublishDate() > DateTime.MinValue) { details += $"Published on: {GetPublishDate()}\n"; }
+        if (GetPublishDate() > DateTime.MinValue) 
+        { 
+            details += $"Published on: {GetPublishDate()}\n"; 
+        }
         details += $"Acquired on: {GetAcquireDate()}\n";
         if (IsOnLoan())
         {
@@ -238,13 +239,16 @@ public abstract class Media
     }
 
     public virtual string GetInfoString()
+    // Returns a single line string suitable for searching
     {
         string info = $"{GetTitle()}," + $"{GetMediaType()}";
         return info;
     }
 
 
-    public abstract Dictionary<string, object> GetDataDictionary();
+    public abstract MediaConvertObject GetData();
+
+    public abstract void SetData(MediaConvertObject mediaData);
     
     
     public void AddNote(string note)
@@ -257,11 +261,16 @@ public abstract class Media
     {
         return _notes[_notes.Count -1];
     }
+
+
+    public void SetNotes(List<string> notes)
+    {
+        _notes = notes;
+    }
     
     
     public List<string> GetNotes()
     {
         return _notes;
     }
-
 }

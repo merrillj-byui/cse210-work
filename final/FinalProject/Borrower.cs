@@ -12,6 +12,7 @@ Attributes
     _zip : string
 Methods
     Borrower(string)
+    Borrower(string, string)
     SetName(string, string) : void
     GetFullName() : string
     GetFirstName() : string
@@ -35,6 +36,7 @@ Methods
 
 public class Borrower
 {
+    // Attributes
     private string _firstName;
     private string _lastName;
     private string _phoneNumber;
@@ -44,6 +46,8 @@ public class Borrower
     private string _state;
     private string _zip;
 
+
+    // Constructors
     public Borrower(string fullName)
     {
         string[] names = fullName.Split(" ");
@@ -51,115 +55,105 @@ public class Borrower
         _lastName = names[1];
     }
 
+    public Borrower(string firstName, string lastName)
+    {
+        _firstName = firstName;
+        _lastName = lastName;
+    }
 
+
+    // Setters and Getters
     public void SetName(string firstName, string lastName)
     {
         _firstName = firstName;
         _lastName = lastName;
     }
-    
 
     public string GetFullName()
     {
         return $"{GetFirstName()} {GetLastName()}";
     }
     
-
     public string GetFirstName()
     {
         return _firstName;
     }
 
-    
     public string GetLastName()
     {
         return _lastName;
     }
     
-
     public string GetFullNameLastFirst()
     {
         return $"{GetLastName()}, {GetFirstName()}";
     }
-
 
     public void SetPhone(string phoneNumber)
     {
         _phoneNumber = phoneNumber;
     }
     
-
     public string GetPhone()
     {
         return _phoneNumber;
     }
-
 
     public void SetEmail(string email)
     {
         _email = email;
     }
 
-
     public string GetEmail()
     {
         return _email;
     }
     
-
     public void SetStreetAddress(string streetAddress)
     {
         _streetAddress = streetAddress;
     }
-    
 
     public string GetStreetAddress()
     {
         return _streetAddress;
-    }
-    
+    }    
 
     public void SetCity(string city)
     {
         _city = city;
     }
 
-
     public string GetCity()
     {
         return _city;
-    }
-    
+    }   
 
     public void SetState(string state)
     {
         _state = state;
-    }
-    
+    }    
 
     public string GetState()
     {
         return _state;
-    }
-    
+    }   
 
     public void SetZip(string zip)
     {
         _zip = zip;
-    }
-    
+    }    
 
     public string GetZip()
     {
         return _zip;
-    }
-    
+    }    
 
+    // Other Methods
     public string GetFullAddress()
     {
         return $"{GetStreetAddress()}\n{GetCity()}, {GetState()} {GetZip()}";
     }
-    
     
     public string GetMailLabel()
     {

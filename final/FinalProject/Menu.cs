@@ -7,7 +7,7 @@ Attributes
     _options : string[]
     _prompt : string
 Methods
-    Menu(string, string[], string)
+    Menu(string[], string)
     DisplayMenu() : void
     GetOptionChoice() : string
 */
@@ -15,43 +15,46 @@ Methods
 
 public class Menu
 {
+    // Attributes
     private string _text;
     private string[] _options;
     private string _prompt;
 
-    public Menu(string text, string[] options, string prompt="Enter your choice: ")
+
+    //Constructors
+    public Menu(string[] options, string prompt="Enter your choice: ")
     {
-        _text = text;
         _options = options;
         _prompt = prompt;
+        int count = 0;
+        // Build the text that gets displayed
+        foreach (string option in _options)
+        {
+            _text += $"  {++count}. {option}\n";
+        }
     }
 
 
+    // Methods
     public void DisplayMenu()
+    // Displays the menu on the console
     {
         // Display the menu on the console
         Console.WriteLine(_text);
     }
 
     public string GetOptionChoice()
+    // Prompts for a selection, and loops until a valid selection is entered
     {
-        string choice = null;
-
-        while (!_options.Contains(choice))
+        int choice = 0;
+        while (choice < 1 || choice > _options.Count())
         {
             // Display the menu prompt
             Console.Write(_prompt);
 
             // Read the choice the user enters
-            choice = Console.ReadLine();
-
-            // If the choice isn't valid, clear it and loop
-            if (!_options.Contains(choice))
-            {
-                choice = null;
-            }
+            int.TryParse(Console.ReadLine(), out choice);
         }
-
-        return choice;
+        return _options[choice - 1];
     }
 }
