@@ -1,6 +1,8 @@
 /*
-Media <abstract>
------
+Single responsibility: To be the parent object to represent a generic media object.
+
+Media <abstract> (not derived)
+------------------------------
 Attributes
     _mediaType : string
     _title : string
@@ -216,15 +218,15 @@ public abstract class Media
         details += $"Media type: {GetMediaType()}\n";
         if (GetPublishDate() > DateTime.MinValue) 
         { 
-            details += $"Published on: {GetPublishDate()}\n"; 
+            details += $"Published: {GetPublishDate().ToString("MMMM yyyy")}\n"; 
         }
-        details += $"Acquired on: {GetAcquireDate()}\n";
+        details += $"Acquired: {GetAcquireDate().ToString("dddd, dd MMMM yyyy")}\n";
         if (IsOnLoan())
         {
             Borrower borrower = GetLastBorrower();
             details += $"Status: On Loan to... \n{borrower.GetMailLabel()}\n";
             details += $"Phone: {borrower.GetPhone()}";
-            details += $"Due date: {_loans[_loans.Count -1].GetDueDate()}";
+            details += $"Due date: {_loans[_loans.Count -1].GetDueDate().ToString("dddd, dd MMMM yyyy")}";
         }
         else if (IsAvailable())
         {

@@ -1,6 +1,8 @@
 /*
-Borrower
---------
+Responsibility: to represent a borrower. Not derived, but used in the Lending record within a Media object.
+
+Borrower (not derived)
+----------------------
 Attributes
     _firstName : string
     _lastName : string

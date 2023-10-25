@@ -1,8 +1,10 @@
 /*
+Single responsibility: To represent a game as a media object.
+
 Media (base)
   ^
-GameMedia
----------
+GameMedia (Derived from Media)
+------------------------------
 Attributes
     _defaultMinAge : int
     _defaultMaxAge : int
@@ -92,16 +94,16 @@ public class GameMedia : Media
         details += $"Media type: {GetMediaType()}\n";
         if (GetMinAge() >= _defaultMinAge || GetMaxAge() <= _defaultMaxAge) 
         { 
-            details += $"Ages: {GetMinAge()} to {GetMaxAge()}"; 
+            details += $"Ages: {GetMinAge()} to {GetMaxAge()}\n"; 
         }
-        details += $"Acquired on: {GetAcquireDate()}\n";
+        details += $"Acquired on: {GetAcquireDate().ToString("dddd, dd MMMM yyyy")}\n";
         if (IsOnLoan())
         {
             LendingRecord loan = GetLastLoan();
             Borrower borrower = GetLastBorrower();
             details += $"Status: On Loan to... \n{borrower.GetMailLabel()}\n";
             details += $"Phone: {borrower.GetPhone()}\n";
-            details += $"Due date: {loan.GetDueDate()}\n";
+            details += $"Due date: {loan.GetDueDate().ToString("dddd, dd MMMM yyyy")}\n";
         }
         else if (IsAvailable()) 
         { 

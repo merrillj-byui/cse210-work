@@ -1,8 +1,10 @@
 /*
+Single responsibility: to represent a Book as a media object
+
 Media (base)
   ^
-BookMedia
----------
+BookMedia (derived from Media)
+------------------------------
 Attributes
     _author : string
     _pages : int
@@ -86,15 +88,15 @@ public class BookMedia : Media
         details += $"Media type: {GetMediaType()}\n";
         details += (GetAuthor() == "") ? "" : $"Author: {GetAuthor()}\n"; 
         details += (GetPages() <= 0) ? "" : $"Pages: {GetPages()}\n"; 
-        details += (GetPublishDate() == DateTime.MinValue) ? "" : $"Published on: {GetPublishDate()}\n"; 
-        details += $"Acquired on: {GetAcquireDate()}\n";
+        details += (GetPublishDate() == DateTime.MinValue) ? "" : $"Published: {GetPublishDate().ToString("MMMM yyyy")}\n"; 
+        details += $"Acquired: {GetAcquireDate().ToString("dddd, dd MMMM yyyy")}\n";
         if (IsOnLoan())
         {
             LendingRecord loan = GetLastLoan();
             Borrower borrower = GetLastBorrower();
             details += $"Status: On Loan to... \n{borrower.GetMailLabel()}'\n";
             details += $"Phone: {borrower.GetPhone()}\n";
-            details += $"Due date: {loan.GetDueDate()}\n";
+            details += $"Due date: {loan.GetDueDate().ToString("dddd, dd MMMM yyyy")}\n";
         }
         else if (IsAvailable()) 
         { 

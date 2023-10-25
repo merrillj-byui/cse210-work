@@ -1,6 +1,8 @@
 /*
-Menu.cs
--------
+Single responsibility: to represent a menu. This project uses multiple menus created from lists.
+
+Menu (not derived)
+------------------
 Menu(string, string[], string)
 Attributes
     _text : string

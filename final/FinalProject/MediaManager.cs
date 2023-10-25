@@ -1,5 +1,9 @@
 /*
-MediaManager.cs
+Single responsibilty: To perform all the interactive tasks and maintain the lists
+for managing media and how the media is loaned. (not derived)
+
+MediaManager (not derived)
+--------------------------
 Attributes
     _filename : string
     _medias : List<Media>
@@ -54,7 +58,7 @@ public class MediaManager
                                      "Load from File", 
                                      "Save to File", 
                                      "Quit"};    
-    private string[] _mediaTypes = {"Book", "Game", "Movie", "Music", "Video Game", "All"};
+    private string[] _mediaTypes = {"Book", "Game", "Movie", "Music", "Video Game"};
     private string[] _movieMenuOptions = {"G", "PG", "PG-13", "NC-17", "R", "Unrated", "Other"};
     private string[] _videoGameMenuOptions = {"E", "E10+", "T", "M", "A", "Unrated", "Other"};
 
@@ -81,6 +85,9 @@ public class MediaManager
     public void Run()
     // The main execution, with the main menu handling
     {
+        // Start by loading the saved media data
+        LoadMedia();
+
         // Loop until the user chooses to quit
         string menuChoice = "";
         while (menuChoice != "Quit")
@@ -89,6 +96,7 @@ public class MediaManager
 
             // Display the main menu and get the user's chosen option
             Console.Clear();
+            Console.WriteLine("Welcome to the Media Manager!\n\nWhat would you like to do?");
             _mainMenu.DisplayMenu();
             menuChoice = _mainMenu.GetOptionChoice();
 
@@ -96,22 +104,38 @@ public class MediaManager
             switch(menuChoice)
             {
                 case "List Media":
-                    index = ListMedia(ChooseMediaType());
-                    if (index >= 0) 
-                    { 
-                        DisplayDetails(index); 
-                        Console.Write("Press Enter to continue");
+                    if (_medias.Count > 0)
+                    {
+                        index = ListMedia(ChooseMediaType());
+                        if (index >= 0) 
+                        { 
+                            DisplayDetails(index); 
+                            Console.Write("Press Enter to continue");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nNo media to list.");
+                        Thread.Sleep(3000);
                     }
                     break;
                 
                 case "List Borrowers":
-                    index = ListBorrowers();
-                    if (index >= 0)
+                    if (_borrowers.Count > 0)
                     {
-                        Console.Clear();
-                        Console.WriteLine(_borrowers[index].GetMailLabel());
-                        Console.Write("\nPress Enter to continue.");
-                        Console.ReadLine();
+                        index = ListBorrowers();
+                        if (index >= 0)
+                        {
+                            Console.Clear();
+                            Console.WriteLine(_borrowers[index].GetMailLabel());
+                            Console.Write("\nPress Enter to continue.");
+                            Console.ReadLine();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nNo borrowers to list.");
+                        Thread.Sleep(3000);
                     }
                     break;
 
@@ -120,15 +144,39 @@ public class MediaManager
                     break;
 
                 case "Loan Media":
-                    LoanMedia();
+                    if (_medias.Count > 0)
+                    {
+                        LoanMedia();
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nNo Media to loan.");
+                        Thread.Sleep(3000);
+                    }
                     break;
 
                 case "Return Media":
-                    ReturnMedia();
+                    if (_medias.Count > 0)
+                    {
+                        ReturnMedia();
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nNo media to return.");
+                        Thread.Sleep(3000);
+                    }
                     break;
 
                 case "Annotate Media":
-                    AnnotateMedia();
+                    if (_medias.Count > 0)
+                    {
+                        AnnotateMedia();
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nNo media to annotate.");
+                        Thread.Sleep(3000);
+                    }
                     break;
 
                 case "Load from File":
@@ -137,7 +185,13 @@ public class MediaManager
 
                 case "Save to File":
                     SaveMedia();
-                    break;                    
+                    break;
+
+                case "Quit":
+                    SaveMedia();
+                    Console.WriteLine("Media data has been saved.");
+                    Console.WriteLine("Thank you for using the Media Manager."); 
+                    break;                   
             }
         }
     }
@@ -159,6 +213,7 @@ public class MediaManager
         int count = 0; // Count of what is actually diaplayed, used for pagination
         string response = "";
         
+        // If there isn't anything to list, just return
         if (_medias.Count == 0 || !_mediaTypes.Contains(type))
         {
             Console.WriteLine("\nNo media to list. (returning)");
@@ -185,14 +240,14 @@ public class MediaManager
                     if (count % 20 == 1)
                     {
                         Console.Clear();
-                        Console.WriteLine("Listing up to 20 at a time...");
+                        Console.WriteLine("Listing up to 20 at a time...\n");
                     }   
                     // Display the listing
                     Console.WriteLine($"  {index + 1}. {media.GetListing()}");
                     // Just displayed the last listing in pagination or list
                     if (count % 20 == 0)
                     {
-                        Console.Write("Enter a number, or press Enter to continue: ");
+                        Console.Write("\nEnter a number, or press Enter to continue: ");
                         response = Console.ReadLine();
                         // If something was entered, break the loop
                         if (response != ""){ break; }
@@ -201,14 +256,28 @@ public class MediaManager
                // Always increment the index, whether or not it matches the search string
                 index ++;
             }
+            // If we are done listing but not on an exact pagination, show this at the end
             if (count %20 != 0)
             {
-                Console.Write("Enter a number, or press Enter to continue: ");
+                Console.Write("\nEnter a number, or press Enter to continue: ");
                 response = Console.ReadLine();
             }
-         }    
-        if (response == ""){index = 0;}
-        else {int.TryParse(response, out index);}
+        }
+        if (count == 0)
+        {
+            index = 0;
+            Console.Write("\nNothing to list.");
+            Thread.Sleep(3000);
+        }    
+        else if (response == "")
+        {
+            index = 0;
+        }
+        else 
+        {
+            int.TryParse(response, out index);
+        }
+        // Will return a valid index into the medias list, or -1 if no item was selected
         return index - 1; // adjusting for 0-base index
     }
 
@@ -219,10 +288,16 @@ public class MediaManager
         int count = 0;
         string response = "";
 
+        // If no borrowers, give a chance to enter one.
         if (_borrowers.Count == 0)
         {
-            NewBorrower();
-            index = 1;
+            Console.Write("\nNo borrowers to list. Enter a new one (y/n)? ");
+            response = Console.ReadLine();
+            if (response.ToLower() == "y")
+            {
+                NewBorrower();
+                index = 1;
+            }
         }
         else
         {
@@ -238,7 +313,7 @@ public class MediaManager
                     if (count % 20 == 1)
                     {
                         Console.Clear();
-                        Console.WriteLine("Listing up to 20 at a time.\n");
+                        Console.WriteLine("\nListing up to 20 at a time.\n");
                     }
                     // Display borrower information on  a single numbered line (number is index)
                     Console.WriteLine($"  {index + 1} {borrower.GetFullName()}, " +
@@ -248,7 +323,7 @@ public class MediaManager
                     // If just displayed last line in pagination...
                     if (count %20 == 0)
                     {
-                        Console.Write("Enter a number, or \"new\", or press Enter to continue. " );
+                        Console.Write("\nEnter a number, or \"new\", or press Enter to continue. " );
                         response = Console.ReadLine();
                         if (response != ""){break;}
                     }
@@ -257,7 +332,7 @@ public class MediaManager
             }
             if (count %20 != 0)
             {
-                Console.Write("Enter a number, or \"new\", or press Enter to continue. " );
+                Console.Write("\nEnter a number, or \"new\", or press Enter to continue. " );
                 response = Console.ReadLine();
             }
             if (response == "new")
@@ -274,7 +349,7 @@ public class MediaManager
     public void NewBorrower()
     // Creates a new borrower and adds it to the list of borrowers
     {
-        Console.Write("Enter the borrower's first name: ");
+        Console.Write("\nEnter the borrower's first name: ");
         string firstName = Console.ReadLine();
         Console.Write("Enter the borrower's first name: ");
         string lastName = Console.ReadLine();
@@ -379,33 +454,41 @@ public class MediaManager
     public void LoanMedia()
     // Allows user to select media from a list and a list of borrowers, and create a loan record
     {
-        string type = "";
-        int mediaIndex = -1;
-        int borrowerIndex = -1;
-
-        Console.WriteLine("\nLet's find the media you want to loan.");
-        Console.WriteLine("\nChoose the media type you are loaning out."); 
-        mediaIndex = ListMedia(ChooseMediaType());
-
-        if (mediaIndex < 0)
+        if (_medias.Count > 0)
         {
-            Console.WriteLine("Nothing selected. (returning)");
-            Thread.Sleep(3000);
-        }
-        else
-        {
-            Console.WriteLine("\nLet's enter who will be borrowing it.");
-            borrowerIndex = ListBorrowers();
+            string type = "";
+            int mediaIndex = -1;
+            int borrowerIndex = -1;
 
-            if (borrowerIndex < 0)
+            Console.WriteLine("\nLet's find the media you want to loan.");
+            Console.WriteLine("\nChoose the media type you are loaning out."); 
+            mediaIndex = ListMedia(ChooseMediaType());
+
+            if (mediaIndex < 0)
             {
-                Console.WriteLine("Nothing selected. (returning)");
+                Console.WriteLine("\nNo media selected. (returning)");
                 Thread.Sleep(3000);
             }
             else
             {
-                _medias[mediaIndex].NewLoan(_borrowers[borrowerIndex]);
-            }            
+                Console.WriteLine("\nLet's enter who will be borrowing it.");
+                borrowerIndex = ListBorrowers();
+
+                if (borrowerIndex < 0)
+                {
+                    Console.WriteLine("\nNo borrowers selected. (returning)");
+                    Thread.Sleep(3000);
+                }
+                else
+                {
+                    _medias[mediaIndex].NewLoan(_borrowers[borrowerIndex]);
+                }            
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nNo media to loan. (returning)");
+            Thread.Sleep(3000);
         }
     }
 
@@ -414,12 +497,12 @@ public class MediaManager
     {
         int mediaIndex = -1;
 
-        Console.WriteLine("Let's find the media that is being returned.");
+        Console.WriteLine("\nLet's find the media that is being returned.");
         mediaIndex = ListMedia(ChooseMediaType());
 
         if (mediaIndex < 0)
         {
-            Console.WriteLine("Nothing Selected. (returning)");
+            Console.WriteLine("\nNothing Selected. (returning)");
             Thread.Sleep(3000);
         }
         else
@@ -431,95 +514,115 @@ public class MediaManager
     public void AnnotateMedia()
     // Adds a note to the media, and allows it to be marked available or not
     {
-        int index = ListMedia(ChooseMediaType());
-        Console.WriteLine("Enter the note: ");
-        string note = Console.ReadLine();
-        _medias[index].AddNote(note);
-        if (_medias[index].IsAvailable())
+        if (_medias.Count > 0)
         {
-            Console.Write("Would you like to toggle this UNAVAILABLE (y/n)? ");
-            string response = Console.ReadLine().ToLower();
-            if (response == "y")
+            int index = ListMedia(ChooseMediaType());
+            Console.WriteLine("Enter the note: ");
+            string note = Console.ReadLine();
+            _medias[index].AddNote(note);
+            if (_medias[index].IsAvailable())
             {
-                _medias[index].SetAvailable(false);
+                Console.Write("Would you like to toggle this UNAVAILABLE (y/n)? ");
+                string response = Console.ReadLine().ToLower();
+                if (response == "y")
+                {
+                    _medias[index].SetAvailable(false);
+                }
+            }
+            else
+            {
+                Console.Write("Would you like to toggle this AVAILABLE (y/n)? ");
+                string response = Console.ReadLine().ToLower();
+                if (response == "y")
+                {
+                    _medias[index].SetAvailable(true);
+                }
             }
         }
         else
         {
-            Console.Write("Would you like to toggle this AVAILABLE (y/n)? ");
-            string response = Console.ReadLine().ToLower();
-            if (response == "y")
-            {
-                _medias[index].SetAvailable(true);
-            }
+            Console.WriteLine("\nNo media to annotate. (returning)");
+            Thread.Sleep(3000);
         }
     }
 
     public void LoadMedia()
     // Loads the media from the media file, deserializing JSON for each line
     {
-        string[] lines = System.IO.File.ReadAllLines(_filename);
-        _medias.Clear();
-        foreach (string line in lines)
+        if (!File.Exists(_filename))
         {
-            //Console.WriteLine(line);
-            MediaConvertObject data = DeserializeMediaData(line);
-            switch (data.mediaType)
+            Console.WriteLine("\nFile isn't found. Enter some media and save it to create the file. (returning)");
+            Thread.Sleep(3000);
+        }
+        else
+        {
+            string[] lines = System.IO.File.ReadAllLines(_filename);
+            _medias.Clear();
+            foreach (string line in lines)
             {
-                case "Book":
-                    BookMedia book = new BookMedia(data.title);
-                    book.SetData(data);
-                    _medias.Add(book);
-                    break;
-                case "Game":
-                    GameMedia game = new GameMedia(data.title);
-                    game.SetData(data);
-                    _medias.Add(game);
-                    break;
+                //Console.WriteLine(line);
+                MediaConvertObject data = DeserializeMediaData(line);
+                switch (data.mediaType)
+                {
+                    case "Book":
+                        BookMedia book = new BookMedia(data.title);
+                        book.SetData(data);
+                        _medias.Add(book);
+                        break;
+                    case "Game":
+                        GameMedia game = new GameMedia(data.title);
+                        game.SetData(data);
+                        _medias.Add(game);
+                        break;
 
-                case "Movie":
-                    MovieMedia movie = new MovieMedia(data.title, data.rating);
-                    movie.SetData(data);
-                    _medias.Add(movie);
-                    break;
-                case "Music":
-                    MusicMedia music = new MusicMedia(data.title, (bool)data.explicitLyrics);
-                    music.SetData(data);
-                    _medias.Add(music);
-                    break;
-                case "Video Game":
-                    VideoGameMedia vidgame = new VideoGameMedia(data.title, data.rating);
-                    vidgame.SetData(data);
-                    _medias.Add(vidgame);
-                    break;
+                    case "Movie":
+                        MovieMedia movie = new MovieMedia(data.title, data.rating);
+                        movie.SetData(data);
+                        _medias.Add(movie);
+                        break;
+                    case "Music":
+                        MusicMedia music = new MusicMedia(data.title, (bool)data.explicitLyrics);
+                        music.SetData(data);
+                        _medias.Add(music);
+                        break;
+                    case "Video Game":
+                        VideoGameMedia vidgame = new VideoGameMedia(data.title, data.rating);
+                        vidgame.SetData(data);
+                        _medias.Add(vidgame);
+                        break;
+                }
             }
-        }
-        // Populate list of borrowers from lending records that were just restored
-        _borrowers.Clear();
-        foreach (Media media in _medias)
-        {
-            foreach (LendingRecord loan in media.GetLoans())
+            // Populate list of borrowers from lending records that were just restored
+            _borrowers.Clear();
+            foreach (Media media in _medias)
             {
-                _borrowers.Add(loan.GetBorrower());
+                foreach (LendingRecord loan in media.GetLoans())
+                {
+                    _borrowers.Add(loan.GetBorrower());
+                }
             }
         }
-        Console.WriteLine("\nData loaded. (returning)");
-        Thread.Sleep(3000);
     }
 
     public void SaveMedia()
     // Serializes the data and saves it to the media file
     {
-        using (StreamWriter outFile = new StreamWriter(_filename))
+        if (_medias.Count > 0)
         {
-            for (int i = 0; i < _medias.Count; i++)
+            using (StreamWriter outFile = new StreamWriter(_filename))
             {
-                //outFile.WriteLine(_medias[i].GetData());
-                outFile.WriteLine(SerializeMediaData(_medias[i].GetData()));
+                for (int i = 0; i < _medias.Count; i++)
+                {
+                    //outFile.WriteLine(_medias[i].GetData());
+                    outFile.WriteLine(SerializeMediaData(_medias[i].GetData()));
+                }
             }
         }
-        Console.WriteLine("\nData saved. (returning)");
-        Thread.Sleep(3000);
+        else
+        {
+            Console.WriteLine("\nNothing to save. (returning)");
+            Thread.Sleep(3000);
+        }
     }
 
     private MediaConvertObject? DeserializeMediaData(string json)

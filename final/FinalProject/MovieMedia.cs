@@ -1,8 +1,10 @@
 /*
+Single responsibility: to represent a movie (e.g. DVDs) as a media object
+
 Media (base)
   ^
-MovieMedia
-----------
+MovieMedia (derived from Media)
+-------------------------------
 Attributes
     _rating : string
     _ratings : string[]
@@ -116,16 +118,16 @@ public class MovieMedia : Media
         details += $"Rated: {GetRating()} - {GetAgeGuidance()}\n";
         if (GetPublishDate() > DateTime.MinValue) 
         { 
-            details += $"Released on: {GetPublishDate()}\n"; 
+            details += $"Released on: {GetPublishDate().ToString("MMMM yyyy")}\n"; 
         }
-        details += $"Acquired on: {GetAcquireDate()}\n";
+        details += $"Acquired on: {GetAcquireDate().ToString("dddd, dd MMMM yyyy")}\n";
         if (IsOnLoan())
         {
             LendingRecord loan = GetLastLoan();
             Borrower borrower = GetLastBorrower();
             details += $"Status: On Loan to... \n{borrower.GetMailLabel()}\n";
             details += $"Phone: {borrower.GetPhone()}\n";
-            details += $"Due date: {loan.GetDueDate()}\n";
+            details += $"Due date: {loan.GetDueDate().ToString("dddd, dd MMMM yyyy")}\n";
         }
         else if (IsAvailable()) 
         { 

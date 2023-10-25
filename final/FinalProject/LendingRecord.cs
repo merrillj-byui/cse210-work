@@ -1,6 +1,8 @@
 /*
-LendingRecord
--------------
+Single responsibility: To represent a loan to a borrower (not derived).
+
+LendingRecord (not derived)
+---------------------------
 Attributes
     _borrower : Borrower
     _borrowedDate : DateTime
